@@ -37,7 +37,10 @@ always_comb begin
     end
     ALU_SUB: begin
       aif.out = $signed(aif.a) - $signed(aif.b);
-      if (aif.b[31] == aif.out[31]) begin   //(pos - neg = neg), (neg - pos = pos)
+      if (aif.a[31]&~aif.b[31]&aif.out[31]) begin //if (neg + neg = pos)
+        aif.V = 1;
+      end
+      else if (~aif.a[31]&aif.b[31]&~aif.out[31]) begin //if (pos + pos = neg)
         aif.V = 1;
       end
     end

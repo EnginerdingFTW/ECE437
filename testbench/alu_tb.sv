@@ -6,6 +6,7 @@
 */
 
 // mapped needs this
+`include "cpu_types_pkg.vh"
 `include "alu_if.vh"
 
 // mapped timing needs this. 1ns is too fast
@@ -31,13 +32,13 @@ module alu_tb;
   alu DUT(aif);
 `else
   alu DUT(
-    .\aif.out (aif.out),
+    .\aif.aluop (aif.aluop),
     .\aif.b (aif.b),
     .\aif.a (aif.a),
-    .\aif.aluop(aif.aluop),
-    .\aif.V(aif.V),
-    .\aif.N(aif.N),
-    .\aif.Z(aif.Z)
+    .\aif.Z (aif.Z),
+    .\aif.V (aif.V),
+    .\aif.N (aif.N),
+    .\aif.out (aif.out)
   );
 `endif
 
@@ -116,7 +117,7 @@ initial begin
     @(negedge CLK);
     succ = 1;
     if ($signed(aif.a) - $signed(aif.b) != aif.out) succ = 0;
-    if ((aif.b[31]==aif.out[31])&~aif.V) succ = 0;
+    if (((aif.a[31]&~aif.b[31]&aif.out[31])|(~aif.a[31]&aif.b[31]&~aif.out[31]))&~aif.V) succ = 0;
     if (!succ) $display("FAIL - SUB: %d - %d != %d", aif.a, aif.b, aif.out);
   end
 

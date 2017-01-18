@@ -7,6 +7,7 @@
 
 // interface
 `include "register_file_if.vh"
+`include "alu_if.vh"
 
 module alu_fpga (
   input logic CLOCK_50,
@@ -21,8 +22,7 @@ module alu_fpga (
   // rf
   alu ALU(aif);
 
-logic [15:0] temp;
-logic [15:0][7:0] hex;
+logic [31:0] temp;
 genvar k, i;
 
 always_ff @ (posedge CLOCK_50) begin
@@ -34,52 +34,169 @@ always_ff @ (posedge CLOCK_50) begin
   end
 end
 
-assign aif.aluop = KEY[3:0];
 assign aif.b = temp;
+assign aif.aluop[3:0] = ~KEY[3:0];
 
 always_comb begin
     if (SW[16] == 1) begin
       aif.a = {16'hFFFF, SW[15:0]};
     end
     else begin
-      aif.b = {16'h0000, SW[15:0]};
+      aif.a = {16'h0000, SW[15:0]};
     end
+
+case (aif.out[3:0])
+  4'h0: HEX0 = 7'b1000000;
+  4'h1: HEX0 = 7'b1111001;
+  4'h2: HEX0 = 7'b0100100;
+  4'h3: HEX0 = 7'b0110000;
+  4'h4: HEX0 = 7'b0011001;
+  4'h5: HEX0 = 7'b0010010;
+  4'h6: HEX0 = 7'b0000010;
+  4'h7: HEX0 = 7'b1111000;
+  4'h8: HEX0 = 7'b0000000;
+  4'h9: HEX0 = 7'b0010000;
+  4'ha: HEX0 = 7'b0001000;
+  4'hb: HEX0 = 7'b0000011;
+  4'hc: HEX0 = 7'b0100111;
+  4'hd: HEX0 = 7'b0100001;
+  4'he: HEX0 = 7'b0000110;
+  4'hf: HEX0 = 7'b0001110;
+endcase
+
+case (aif.out[7:4])
+  4'h0: HEX1 = 7'b1000000;
+  4'h1: HEX1 = 7'b1111001;
+  4'h2: HEX1 = 7'b0100100;
+  4'h3: HEX1 = 7'b0110000;
+  4'h4: HEX1 = 7'b0011001;
+  4'h5: HEX1 = 7'b0010010;
+  4'h6: HEX1 = 7'b0000010;
+  4'h7: HEX1 = 7'b1111000;
+  4'h8: HEX1 = 7'b0000000;
+  4'h9: HEX1 = 7'b0010000;
+  4'ha: HEX1 = 7'b0001000;
+  4'hb: HEX1 = 7'b0000011;
+  4'hc: HEX1 = 7'b0100111;
+  4'hd: HEX1 = 7'b0100001;
+  4'he: HEX1 = 7'b0000110;
+  4'hf: HEX1 = 7'b0001110;
+endcase
+
+case (aif.out[11:8])
+  4'h0: HEX2 = 7'b1000000;
+  4'h1: HEX2 = 7'b1111001;
+  4'h2: HEX2 = 7'b0100100;
+  4'h3: HEX2 = 7'b0110000;
+  4'h4: HEX2 = 7'b0011001;
+  4'h5: HEX2 = 7'b0010010;
+  4'h6: HEX2 = 7'b0000010;
+  4'h7: HEX2 = 7'b1111000;
+  4'h8: HEX2 = 7'b0000000;
+  4'h9: HEX2 = 7'b0010000;
+  4'ha: HEX2 = 7'b0001000;
+  4'hb: HEX2 = 7'b0000011;
+  4'hc: HEX2 = 7'b0100111;
+  4'hd: HEX2 = 7'b0100001;
+  4'he: HEX2 = 7'b0000110;
+  4'hf: HEX2 = 7'b0001110;
+endcase
+
+case (aif.out[15:12])
+  4'h0: HEX3 = 7'b1000000;
+  4'h1: HEX3 = 7'b1111001;
+  4'h2: HEX3 = 7'b0100100;
+  4'h3: HEX3 = 7'b0110000;
+  4'h4: HEX3 = 7'b0011001;
+  4'h5: HEX3 = 7'b0010010;
+  4'h6: HEX3 = 7'b0000010;
+  4'h7: HEX3 = 7'b1111000;
+  4'h8: HEX3 = 7'b0000000;
+  4'h9: HEX3 = 7'b0010000;
+  4'ha: HEX3 = 7'b0001000;
+  4'hb: HEX3 = 7'b0000011;
+  4'hc: HEX3 = 7'b0100111;
+  4'hd: HEX3 = 7'b0100001;
+  4'he: HEX3 = 7'b0000110;
+  4'hf: HEX3 = 7'b0001110;
+endcase
+
+case (aif.out[19:16])
+  4'h0: HEX4 = 7'b1000000;
+  4'h1: HEX4 = 7'b1111001;
+  4'h2: HEX4 = 7'b0100100;
+  4'h3: HEX4 = 7'b0110000;
+  4'h4: HEX4 = 7'b0011001;
+  4'h5: HEX4 = 7'b0010010;
+  4'h6: HEX4 = 7'b0000010;
+  4'h7: HEX4 = 7'b1111000;
+  4'h8: HEX4 = 7'b0000000;
+  4'h9: HEX4 = 7'b0010000;
+  4'ha: HEX4 = 7'b0001000;
+  4'hb: HEX4 = 7'b0000011;
+  4'hc: HEX4 = 7'b0100111;
+  4'hd: HEX4 = 7'b0100001;
+  4'he: HEX4 = 7'b0000110;
+  4'hf: HEX4 = 7'b0001110;
+endcase
+
+case (aif.out[23:20])
+  4'h0: HEX5 = 7'b1000000;
+  4'h1: HEX5 = 7'b1111001;
+  4'h2: HEX5 = 7'b0100100;
+  4'h3: HEX5 = 7'b0110000;
+  4'h4: HEX5 = 7'b0011001;
+  4'h5: HEX5 = 7'b0010010;
+  4'h6: HEX5 = 7'b0000010;
+  4'h7: HEX5 = 7'b1111000;
+  4'h8: HEX5 = 7'b0000000;
+  4'h9: HEX5 = 7'b0010000;
+  4'ha: HEX5 = 7'b0001000;
+  4'hb: HEX5 = 7'b0000011;
+  4'hc: HEX5 = 7'b0100111;
+  4'hd: HEX5 = 7'b0100001;
+  4'he: HEX5 = 7'b0000110;
+  4'hf: HEX5 = 7'b0001110;
+endcase
+
+case (aif.out[27:24])
+  4'h0: HEX6 = 7'b1000000;
+  4'h1: HEX6 = 7'b1111001;
+  4'h2: HEX6 = 7'b0100100;
+  4'h3: HEX6 = 7'b0110000;
+  4'h4: HEX6 = 7'b0011001;
+  4'h5: HEX6 = 7'b0010010;
+  4'h6: HEX6 = 7'b0000010;
+  4'h7: HEX6 = 7'b1111000;
+  4'h8: HEX6 = 7'b0000000;
+  4'h9: HEX6 = 7'b0010000;
+  4'ha: HEX6 = 7'b0001000;
+  4'hb: HEX6 = 7'b0000011;
+  4'hc: HEX6 = 7'b0100111;
+  4'hd: HEX6 = 7'b0100001;
+  4'he: HEX6 = 7'b0000110;
+  4'hf: HEX6 = 7'b0001110;
+endcase
+
+case (aif.out[31:28])
+  4'h0: HEX7 = 7'b1000000;
+  4'h1: HEX7 = 7'b1111001;
+  4'h2: HEX7 = 7'b0100100;
+  4'h3: HEX7 = 7'b0110000;
+  4'h4: HEX7 = 7'b0011001;
+  4'h5: HEX7 = 7'b0010010;
+  4'h6: HEX7 = 7'b0000010;
+  4'h7: HEX7 = 7'b1111000;
+  4'h8: HEX7 = 7'b0000000;
+  4'h9: HEX7 = 7'b0010000;
+  4'ha: HEX7 = 7'b0001000;
+  4'hb: HEX7 = 7'b0000011;
+  4'hc: HEX7 = 7'b0100111;
+  4'hd: HEX7 = 7'b0100001;
+  4'he: HEX7 = 7'b0000110;
+  4'hf: HEX7 = 7'b0001110;
+endcase
 end
-
-generate
-  for (k = 0; k < 8; k++) begin
-    for (i = 0; i < 4; i++) begin
-      case (aif.out[(4*k + 3):(4*k)])
-        4'h0: hex[k] = 7'b1000000;
-        4'h1: hex[k] = 7'b1111001;
-        4'h2: hex[k] = 7'b0100100;
-        4'h3: hex[k] = 7'b0110000;
-        4'h4: hex[k] = 7'b0011001;
-        4'h5: hex[k] = 7'b0010010;
-        4'h6: hex[k] = 7'b0000010;
-        4'h7: hex[k] = 7'b1111000;
-        4'h8: hex[k] = 7'b0000000;
-        4'h9: hex[k] = 7'b0010000;
-        4'ha: hex[k] = 7'b0001000;
-        4'hb: hex[k] = 7'b0000011;
-        4'hc: hex[k] = 7'b0100111;
-        4'hd: hex[k] = 7'b0100001;
-        4'he: hex[k] = 7'b0000110;
-        4'hf: hex[k] = 7'b0001110;
-      endcase
-    end
-  end
-endgenerate
-
-assign HEX7 = hex[7];
-assign HEX6 = hex[6];
-assign HEX5 = hex[5];
-assign HEX4 = hex[4];
-assign HEX3 = hex[3];
-assign HEX2 = hex[2];
-assign HEX1 = hex[1];
-assign HEX0 = hex[0];
-
 
 /*
 assign rfif.wsel = SW[4:0];
