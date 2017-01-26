@@ -20,12 +20,12 @@ module memory_control (
   import cpu_types_pkg::*;
 
   // number of cpus for cc
-  parameter CPUS = 2;
+  parameter CPUS = 1;
 
-  assign ccif.ramREN = (ccif.dREN == 1 || cif.iREN == 1);
+  assign ccif.ramREN = ((ccif.dREN == 1 | ccif.iREN == 1) & (ccif.dWEN == 0));
   assign ccif.ramWEN = ccif.dWEN;
   assign ccif.dload = ccif.ramload;
-  assign ccif.iload = ccif.ramload;
+  assign ccif.iload = (ccif.iREN == 1) ? ccif.ramload : '0;
   assign ccif.ramstore = ccif.dstore;
 
   always_comb begin
@@ -42,10 +42,8 @@ module memory_control (
       if (ccif.dWEN == 1 || ccif.dREN == 1) begin
         ccif.dwait = 0;
       end
-      else if begin
-        if (ccif.iREN == 1) begin
-          ccif.iwait = 0;
-        end
+      else if (ccif.iREN) begin
+        ccif.iwait = 0;
       end
     end
   end
