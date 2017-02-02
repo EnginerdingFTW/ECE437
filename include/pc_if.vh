@@ -4,19 +4,20 @@
 `include "cpu_types_pkg.vh"
 
 interface pc_if;
-  import cpu_types_pkg::*
+  import cpu_types_pkg::*;
 
-  word_t address, next_address;
-  logic nPC_sel, freeze;
+  word_t pcaddr, alu_out, instruction;
+  logic [IMM_W-1:0] imm16;
+  logic branch, jump, equal, link, pcen, toreg;
 
   modport pc (
-    input next_address, nPC_sel, freeze,
-    output address
+    input alu_out, instruction, imm16, branch, jump, equal, toreg, pcen,
+    output pcaddr
   );
 
   modport tb (
-    input address,
-    output next_address, nPC_sel, freeze
+    input pcaddr,
+    output alu_out, instruction, imm16, branch, jump, equal, toreg, pcen
   );
 
 endinterface

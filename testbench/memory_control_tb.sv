@@ -2,6 +2,13 @@
 `include "caches_if.vh"
 `include "cpu_ram_if.vh"
 `include "cpu_types_pkg.vh"
+
+`define EXPAND_MAPPING(IF,SIGNAL)\
+.\"IF"."SIGNAL"_0_0("IF"."SIGNAL"[0][0]), \
+
+
+
+
 import cpu_types_pkg::*;
 
 // mapped timing needs this. 1ns is too fast

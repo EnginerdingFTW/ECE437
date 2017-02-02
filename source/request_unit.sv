@@ -6,7 +6,7 @@ import cpu_types_pkg::*;
   Summary: When a write or read is requested to memory, the signal needs to be
   held until the write/read has finished.
 */
-module request_unity (
+module request_unit (
   input logic CLK, nRST,
   request_unit_if.ru ruif
 );
@@ -29,12 +29,14 @@ end
 always_comb begin
   if (ruif.dhit) begin  //VERY IMPORTANT -> de-assert the D-request.
     n_dmemREN = 0;
-    n_dmemREN = 0;
+    n_dmemWEN = 0;
   end
+
   else if (ruif.ihit) begin
     n_dmemREN = ruif.MemToReg;
     n_dmemWEN = ruif.WriteMem;
   end
+
   else begin
     n_dmemREN = ruif.dmemREN;
     n_dmemWEN = ruif.dmemWEN;

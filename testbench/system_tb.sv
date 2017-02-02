@@ -73,6 +73,7 @@ program test(input logic CLK, output logic nRST, system_if.tb syif);
     begin
       @(posedge CLK);
       cycles++;
+      //if (cycles > 10000) break;
     end
     $display("Halted at %g time and ran for %d cycles.",$time, cycles);
     nRST = 0;

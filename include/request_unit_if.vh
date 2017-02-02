@@ -4,7 +4,7 @@
 `include "cpu_types_pkg.vh"
 import cpu_types_pkg::*;
 
-interface request_unit;
+interface request_unit_if;
   logic dmemREN, dmemWEN, MemToReg, WriteMem, dhit, ihit, addr, dmemaddr;
 
   modport ru (
@@ -13,7 +13,8 @@ interface request_unit;
   );
 
   modport tb (
-    input dmemREN, dmemWEN,
-    output MemToReg, WriteMem, dhit, ihit
+    input dmemREN, dmemWEN, dmemaddr,
+    output MemToReg, WriteMem, dhit, ihit, addr
   );
 endinterface
+`endif
