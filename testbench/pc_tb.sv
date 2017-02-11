@@ -65,7 +65,7 @@ program test
     nRST = 1;
     print = 1;
     k = -1;
-    pcif.alu_out = 32'hBBBBBBBB;
+    pcif.rdat1 = 32'hBBBBBBBB;
     pcif.instruction = 32'hAAAAAAAA;
     pcif.imm16 = 16'h0020;
     pcif.branch = 0;
@@ -82,10 +82,11 @@ program test
     wait_cycles(3);
     pcif.toreg = 1;
     wait_cycles(3);
-    pcif.alu_out = 32'h00000000;
+    pcif.rdat1 = 32'h00000000;
     wait_cycles(3);
 
     //BNE
+    pcif.id_pc = 32'h00001000;
     pcif.jump = 0;
     pcif.branch = 1;
     wait_cycles(3);

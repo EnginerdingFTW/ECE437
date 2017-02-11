@@ -25,23 +25,24 @@ always_ff @ (posedge CLK, negedge nRST) begin
     end
   end
 end
+assign pcif.next_pc = n_pc;
 
 always_comb begin
   //logic for different n_pc's
   pc_4 = pc + 4;
-  pc_j = {pc_4[31:28], (pcif.instruction[27:0]<<2)};
-  pc_jr = pcif.alu_out;
-  pc_br = pc_4 + ({{16{pcif.imm16[15]}}, pcif.imm16} << 2);
+  pc_j = {pc_4[31:28], (pcif.id_instruction[27:0]<<2)};
+  pc_jr = pcif.id_rdat1;
+  pc_br = (pcif.ex_pc + 4) + ({{16{pcif.ex_imm16[15]}}, pcif.ex_imm16} << 2);
 
   //program counter mux
-  if (pcif.jump == 1 && pcif.toreg == 0 && pcif.branch == 0) begin  //jump
-    n_pc = pc_j;
-  end
-  else if (pcif.jump == 1 && pcif.toreg == 1 && pcif.branch == 0) begin //jump reg
-    n_pc = pc_jr;
-  end                           //BEQ                                     BNE
-  else if (pcif.branch == 1 && ((pcif.equal == 1 && pcif.jump == 1) || (pcif.equal == 0 && pcif.jump == 0))) begin
+  if (pcif.ex_branch == 1 && ((pcif.ex_equal == 1 && pcif.ex_jump == 1) || (pcif.ex_equal == 0 && pcif.ex_jump == 0))) begin
     n_pc = pc_br;
+  end
+  else if (pcif.id_jump == 1 && pcif.id_toreg == 0 && pcif.id_branch == 0) begin  //jump
+    n_pc = pc_j;      //if jump is in ID and a branch is in EX, problem? watch.
+  end
+  else if (pcif.id_jump == 1 && pcif.id_toreg == 1 && pcif.id_branch == 0) begin //jump reg
+    n_pc = pc_jr;
   end
   else begin
     n_pc = pc_4;

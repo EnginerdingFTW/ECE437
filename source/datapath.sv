@@ -12,6 +12,8 @@
 `include "alu_if.vh"
 `include "control_unit_if.vh"
 `include "request_unit_if.vh"
+`include "pipeline_registers_if.vh"
+`include "hazard_unit_if.vh"
 
 // alu op, mips op, and instruction type
 `include "cpu_types_pkg.vh"
@@ -34,20 +36,23 @@ module datapath (
   funct_t funct;
   opcode_t opcode;
 
+
   //interfaces
   register_file_if rfif();
   alu_if aluif();
   control_unit_if cuif();
-  request_unit_if ruif();
+//  request_unit_if ruif();
   pc_if pcif();
+  pipeline_registers_if prif();
+  hazard_unit_if huif();
 
-  assign opcode = opcode_t'(dpif.imemload[31:26]);
-  assign rs = dpif.imemload[25:21];
-  assign rt = dpif.imemload[20:16];
-  assign rd = dpif.imemload[15:11];
-  assign shamt = dpif.imemload[10:6]; //might not need
-  assign funct = funct_t'(dpif.imemload[5:0]);  //might not need
-  assign imm16 = dpif.imemload[15:0];
+  assign opcode = opcode_t'(prif.id_imemload[31:26]);
+  assign rs = prif.id_imemload[25:21];
+  assign rt = prif.id_imemload[20:16];
+  assign rd = prif.id_imemload[15:11];
+  assign shamt = prif.id_imemload[10:6]; //might not need
+  assign funct = funct_t'(prif.id_imemload[5:0]);  //might not need
+  assign imm16 = prif.id_imemload[15:0];
   assign dest = ((cuif.link == 1) ? 5'h1F : ((cuif.regdst == 1) ? rd : rt));
 
 
@@ -55,68 +60,130 @@ module datapath (
   register_file REGS (CLK, nRST, rfif);
   alu ALU (aluif);
   control_unit CONTROL (cuif);
-  request_unit REQUEST (CLK, nRST, ruif);
+//  request_unit REQUEST (CLK, nRST, ruif);
   pc PRG_CNTR (CLK, nRST, pcif);
+  pipeline_registers PIPLINE (CLK, nRST, prif);
+  hazard_unit HAZARD (huif);
+
+  //hazard unit
+  assign huif.id_opcode = opcode;
+  assign huif.ex_opcode = prif.ex_instr;
+  assign huif.funct = funct;
+  assign huif.branch_predicted = ~((aluif.Z&prif.ex_jump)|(~aluif.Z&~prif.ex_jump));
+  assign huif.ex_rs = prif.ex_rs;
+  assign huif.ex_rt = prif.ex_rt;
+  assign huif.mem_rd = prif.mem_rd;
+  assign huif.mem_instr = prif.mem_instr;
 
   //fetch
     //program counter interface
-  assign pcif.alu_out = rfif.rdat1;
-  assign pcif.instruction = dpif.imemload;  //loaded from pc
-  assign pcif.imm16 = imm16;
-  assign pcif.branch = cuif.branch;
-  assign pcif.jump = cuif.jump;
-  assign pcif.equal = aluif.Z;
-  assign pcif.toreg = cuif.regtopc;
-  assign pcif.pcen = cuif.pcen & dpif.ihit & ~dpif.dhit;
+  assign pcif.ex_pc = prif.mem_pc;  //the pc associated with branch is 1 ahead
+  assign pcif.id_rdat1 = rfif.rdat1;
+  assign pcif.ex_rdat1 = prif.ex_rdat1;
+  assign pcif.id_instruction = prif.id_imemload; //this might be cycle early
+  assign pcif.id_imm16 = imm16;
+  assign pcif.ex_imm16 = prif.ex_imm16;
+  assign pcif.id_jump = cuif.jump;
+  assign pcif.id_branch = cuif.branch;
+  assign pcif.id_toreg = cuif.regtopc;
+  assign pcif.ex_equal = aluif.Z;
+  assign pcif.ex_branch = prif.ex_branch;
+  assign pcif.ex_jump = prif.ex_jump;
+  assign pcif.pcen = cuif.pcen && dpif.ihit && ~huif.stall;
+
+// pipeline inputs
+  assign prif.ihit = dpif.ihit;
+  assign prif.dhit = dpif.dhit;
+ // assign prif.if_pc = pcif.pcaddr; //is this needed?
+  assign prif.id_pc = pcif.pcaddr;
+  assign prif.if_imemload = dpif.imemload;
+  assign prif.id_rdat1 = rfif.rdat1;
+  assign prif.id_rdat2 = rfif.rdat2;
+  assign prif.ex_aluout = aluif.out;
+  assign prif.mem_dmemload = dpif.dmemload;
+  assign prif.ex_dmemstore = prif.ex_rdat2;
+  assign prif.id_extender_out = extender_out;
+  assign prif.id_instr = opcode;
+  assign prif.id_funct = funct;
+  assign prif.id_rd = dest; //the rd slot, the the rd variable up above
+  assign prif.id_rs = rs;
+  assign prif.id_rt = rt;
+  assign prif.id_shamt = shamt;
+  assign prif.id_aluop = cuif.aluop;
+  assign prif.id_lui = cuif.lui;
+  assign prif.id_halt = halt;
+  assign prif.id_ext_type = cuif.ext_type;
+  assign prif.id_alusrc = cuif.alusrc;
+  assign prif.id_memtoreg = cuif.memtoreg;
+  assign prif.id_RWEN = cuif.RWEN;
+  assign prif.id_imemREN = cuif.imemREN;
+  assign prif.id_dmemREN = cuif.dmemREN;
+  assign prif.id_dmemWEN = cuif.dmemWEN;
+  assign prif.id_jump = cuif.jump;
+  assign prif.id_branch = cuif.branch;
+  assign prif.id_link = cuif.link;
+  assign prif.id_shift = cuif.shift;
+  assign prif.id_regtopc = cuif.regtopc;
+  assign prif.id_flush = huif.id_flush;
+  assign prif.ex_flush = huif.ex_flush;
+  assign prif.mem_flush = huif.mem_flush;
+  assign prif.wb_flush = huif.wb_flush;
+  assign prif.stall = huif.stall;
+  assign prif.id_imm16 = imm16;
 
   //decode
     //control unit interface
-  assign cuif.instr = dpif.imemload;
+  assign cuif.instr = prif.id_imemload;
   always_ff @ (posedge CLK, negedge nRST) begin
     if (nRST == 0) begin
       halt <= 0;
     end
-    else if (cuif.halt == 1) begin
-      halt <= cuif.halt;
+    else begin
+      if (cuif.halt == 1) begin
+        halt <= cuif.halt;
+      end
     end
   end
 
     //register file interface
-  assign rfif.WEN = ((cuif.RWEN && opcode != LW && dpif.ihit) || (opcode == LW && dpif.dhit == 1));//cur_RWEN;//cuif.RWEN
-  assign rfif.wsel = dest;
+  assign rfif.WEN = (prif.wb_RWEN);
+  assign rfif.wsel = prif.wb_rd;
   assign rfif.rsel1 = rs;
   assign rfif.rsel2 = rt;
   assign rfif.wdat = wdat;
 
   //execute
     //alu interface
-  assign aluif.a = (cuif.link == 1) ? '0 : rfif.rdat1;
+  assign aluif.a = (prif.ex_link == 1) ? '0 : prif.ex_rdat1;
   assign aluif.b = rdat2temp;
-  assign aluif.aluop = cuif.aluop;
+  assign aluif.aluop = prif.ex_aluop;
 
     //rdat2 mux's
+        //done in decode
   assign extender_out = (cuif.lui == 1) ? {imm16, 16'h0000} : ((cuif.ext_type == 1) ? {16'h0000, imm16} : {{16{imm16[15]}}, imm16});
-  assign rdat2temp = ((cuif.shift == 1) ? {27'h0000000, shamt} : ((cuif.alusrc == 1) ? extender_out : rfif.rdat2));
+        //done in execute
+  assign rdat2temp = ((prif.ex_shift == 1) ? {27'h0000000, prif.ex_shamt} : ((prif.ex_alusrc == 1) ? prif.ex_extender_out : prif.ex_rdat2));
 
   //memory
+/*  single cycle request unit
     //request unit interface
   assign ruif.MemToReg = cuif.memtoreg; //dREN
   assign ruif.WriteMem = cuif.dmemWEN;  //dWEN
   assign ruif.dhit = dpif.dhit;
   assign ruif.ihit = dpif.ihit;
   assign ruif.addr = aluif.out;
-
+*/
     //datapath interface
-  assign dpif.halt = halt;
+  assign dpif.halt = prif.wb_halt;
   assign dpif.imemREN = cuif.imemREN;
-  assign dpif.imemaddr = pcif.pcaddr;
-  assign dpif.dmemREN = ruif.dmemREN;
-  assign dpif.dmemWEN = ruif.dmemWEN;
-  assign dpif.dmemstore = rfif.rdat2;
-  assign dpif.dmemaddr = aluif.out;
+  assign dpif.imemaddr = pcif.pcaddr; //fetch addres
+  assign dpif.dmemREN = prif.mem_dmemREN; //in mem pipe
+  assign dpif.dmemWEN = prif.mem_dmemWEN; //in mem pipe
+  assign dpif.dmemstore = prif.mem_dmemstore; //in mem pipe
+  assign dpif.dmemaddr = prif.mem_aluout;   //in mem pipe
       //datomic?
 
   //writeback
     //mux's
-  assign wdat = ((cuif.link == 1) ? pcif.pcaddr + 4 : ((cuif.memtoreg == 1) ? dpif.dmemload : aluif.out));
+  assign wdat = ((prif.wb_link == 1) ? prif.out_pc + 4  : ((prif.wb_memtoreg == 1) ? prif.wb_dmemload : prif.wb_aluout));
 endmodule
