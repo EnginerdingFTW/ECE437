@@ -1,13 +1,13 @@
 org 0x0000  #program starting address
 
-ori $29, $0, 0xFFFC #initialize stack pointer
-ori $8, $0, 0x0000  #initialize counter
-ori $11, $0, 0x0000 #initialize product
+ori $29, $0, 0xFFFC #initialize stack pointer   #0
+ori $8, $0, 0x0000  #initialize counter         #4
+ori $11, $0, 0x0000 #initialize product         #8
 
-ori $12, $0, 0x0005 #initialize operand 1
-ori $13, $0, 0x0004 #initialize operand 2
+ori $12, $0, 0x0005 #initialize operand 1       #c
+ori $13, $0, 0x0004 #initialize operand 2       #10
 
-push $12
+push $12                                        #14
 push $13
 
 pop $9

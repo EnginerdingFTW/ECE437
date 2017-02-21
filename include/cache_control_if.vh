@@ -14,7 +14,7 @@
 <<<<<<< HEAD
   2) Provide the memory controller with signals used to
 =======
-  2) Provide the memory controller with signals used to 
+  2) Provide the memory controller with signals used to
 >>>>>>> 3e494015151c715372e9867ad265c19785f36dd5
   communicate with RAM.
 
@@ -57,10 +57,10 @@ interface cache_control_if(
   ramstate_t              ramstate;
   word_t                  ramaddr, ramstore, ramload;
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
   /*
 =======
-  /* 
+  /*
 >>>>>>> 3e494015151c715372e9867ad265c19785f36dd5
      These interface assignments are to avoid synthesis errors and
      strange simulation behavior.
@@ -73,11 +73,11 @@ interface cache_control_if(
      Note: iREN, dREN, dWEN, dstore, iaddr, daddr, ccwrite, and cctrans
 	   cannot be assigned directly through the cache_control_if.
 =======
-     signals is required by the memory controller.  For multiprocessors, 
+     signals is required by the memory controller.  For multiprocessors,
      all signals are arrays of 2 and must be indexed.
 
      Note: iREN, dREN, dWEN, dstore, iaddr, daddr, ccwrite, and cctrans
-	   cannot be assigned directly through the cache_control_if. 
+	   cannot be assigned directly through the cache_control_if.
 >>>>>>> 3e494015151c715372e9867ad265c19785f36dd5
 	   These signals can be written to through a caches_if sent
 		 into the cache_control_interface
@@ -152,18 +152,6 @@ interface cache_control_if(
             ccwait, ccinv, ccsnoopaddr
   );
 
-<<<<<<< HEAD
-  modport tb (
-    input   iwait, dwait, iload, dload,
-            ramstore, ramaddr, ramWEN, ramREN,
-            ccwait, ccinv, ccsnoopaddr,
-    output  iREN, dREN, dWEN, dstore, iaddr, daddr,
-            ramload, ramstate,
-            ccwrite, cctrans
-  );
-
-=======
->>>>>>> 3e494015151c715372e9867ad265c19785f36dd5
 endinterface
 
 `endif //CACHE_CONTROL_IF_VH

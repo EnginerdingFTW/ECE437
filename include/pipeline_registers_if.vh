@@ -15,14 +15,14 @@ interface pipeline_registers_if;
   import cpu_types_pkg::*;
 
   //enable signals
-  logic id_flush, ex_flush, mem_flush, wb_flush, stall;
+  logic id_flush, ex_flush, mem_flush, wb_flush, stall, j_stall;
   logic ihit, dhit;
 
   //data signals
   word_t out_pc, id_pc, ex_pc, mem_pc, wb_pc; //pc's going into these stages
   word_t id_rdat1, id_rdat2, ex_rdat1, ex_rdat2;
   word_t ex_aluout, mem_aluout, wb_aluout;
-  word_t mem_dmemload, wb_dmemload;
+  word_t mem_dmemload, temp_dmemload, wb_dmemload;
   word_t ex_dmemstore, mem_dmemstore;
   word_t id_extender_out, ex_extender_out;
   word_t if_imemload, id_imemload;
@@ -56,9 +56,9 @@ interface pipeline_registers_if;
             id_aluop, id_lui, id_halt, id_ext_type, id_alusrc, id_memtoreg,
             id_RWEN, id_imemREN, id_dmemREN, id_dmemWEN, id_jump, id_branch,
             id_link, id_shift, id_regtopc, id_flush, ex_flush, mem_flush,
-            wb_flush, stall, ihit, dhit, id_imm16,
+            wb_flush, stall, ihit, dhit, id_imm16, j_stall,
     output  out_pc, ex_pc, mem_pc, wb_pc, id_imemload, ex_rdat1, ex_rdat2, mem_aluout,
-            wb_aluout, wb_dmemload, mem_dmemstore, ex_extender_out,
+            wb_aluout, temp_dmemload, wb_dmemload, mem_dmemstore, ex_extender_out,
             ex_instr, mem_instr, wb_instr, ex_funct, ex_rd, mem_rd,
             wb_rd, ex_rt, mem_rt, wb_rt, ex_rs, mem_rs, wb_rs, ex_shamt,
             ex_aluop, ex_lui, ex_shift, ex_alusrc, ex_dmemREN, ex_dmemWEN, ex_halt,
@@ -69,7 +69,7 @@ interface pipeline_registers_if;
   //alu tb ports
   modport tb (
     input   out_pc, ex_pc, mem_pc, wb_pc, id_imemload, ex_rdat1, ex_rdat2, mem_aluout,
-            wb_aluout, wb_dmemload, mem_dmemstore, ex_extender_out,
+            wb_aluout, temp_dmemload, wb_dmemload, mem_dmemstore, ex_extender_out,
             ex_instr, mem_instr, wb_instr, ex_funct, ex_rd, mem_rd,
             wb_rd, ex_rt, mem_rt, wb_rt, ex_rs, mem_rs, wb_rs, ex_shamt,
             ex_aluop, ex_lui, ex_shift, ex_alusrc, ex_dmemREN, ex_dmemWEN, ex_halt,
@@ -81,7 +81,7 @@ interface pipeline_registers_if;
             id_aluop, id_lui, id_halt, id_ext_type, id_alusrc, id_memtoreg,
             id_RWEN, id_imemREN, id_dmemREN, id_dmemWEN, id_jump, id_branch,
             id_link, id_shift, id_regtopc, id_flush, ex_flush, mem_flush,
-            wb_flush, stall, ihit, dhit, id_imm16
+            wb_flush, stall, ihit, dhit, id_imm16, j_stall
   );
 endinterface
 
