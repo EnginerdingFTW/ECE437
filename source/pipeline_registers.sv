@@ -7,6 +7,7 @@ module pipeline_registers (
 );
 
 word_t temp_dmemload;
+assign prif.temp_dmemload = temp_dmemload;
 
 always_ff @ (posedge CLK, negedge nRST) begin
   if (nRST == 0) begin
@@ -68,7 +69,7 @@ always_ff @ (posedge CLK, negedge nRST) begin
       prif.id_imemload <= '0;
     end
     else begin
-if (prif.stall == 0) begin
+if (prif.stall == 0 && prif.j_stall == 0) begin
       prif.id_imemload <= prif.if_imemload;
 end
     end
@@ -99,7 +100,7 @@ end
       prif.ex_branch <= '0;
     end
     else begin
-if (prif.stall == 0) begin
+if (prif.stall == 0 && prif.j_stall == 0) begin
       prif.ex_pc <= prif.id_pc;
       prif.ex_rdat1 <= prif.id_rdat1;
       prif.ex_rdat2 <= prif.id_rdat2;
@@ -194,6 +195,7 @@ end
     prif.mem_dmemREN <= 0;
     prif.mem_dmemWEN <= 0;
     temp_dmemload <= prif.mem_dmemload;
+/*
     prif.wb_pc <= prif.mem_pc;
     prif.wb_aluout <= prif.mem_aluout;
     prif.wb_dmemload <= temp_dmemload;
@@ -205,6 +207,7 @@ end
     prif.wb_halt <= prif.mem_halt;
     prif.wb_link <= prif.mem_link;
     prif.wb_RWEN <= prif.mem_RWEN;
+*/
   end
 
 end
@@ -213,4 +216,4 @@ end
 
 
 
-endmodule;
+endmodule
